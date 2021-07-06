@@ -15,20 +15,26 @@ function preload(){
   fruit3 = loadImage("fruit3.png");
   fruit4 = loadImage("fruit4.png");
   gameOverImage = loadImage("gameover.png")
-
+  bgimg= loadImage("bg.jpg");
+  goimg= loadImage('go.png')
+  reimg= loadImage('re.png')
   //load sound here
+  knifeSwoosh =  loadSound("knifeSwoosh.mp3");
+  goversound= loadSound("gameover.mp3");
 }
 
 
 
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(displayWidth-20,displayHeight-110);
   
   //creating sword
-   knife=createSprite(40,200,20,20);
+   knife=createSprite(displayWidth/2,displayHeight/2,20,20);
    knife.addImage(knifeImage);
-   knife.scale=0.7
-  
+   knife.scale=1
+   restart= createSprite(displayWidth/2-20, displayHeight/2+150)
+   restart.addImage(reimg)
+   restart.scale=0.9;
   //set collider for sword
   knife.setCollider("rectangle",0,0,40,40);
 
@@ -38,9 +44,109 @@ function setup() {
   monsterGroup=createGroup();
   
 }
+function draw(){
+  
+  if(gameState===PLAY){
+    background(bgimg);knife.visible=true;
+    restart.visible=false;
+  knife.x=mouseX;
+  knife.y=mouseY;
 
+
+
+  monsters();
+  fruits();
+  if(fruitGroup.isTouching(knife)){
+    fruitGroup.destroyEach();
+    score=score+50;
+    knifeSwoosh.play();
+    }
+    if(monsterGroup.isTouching(knife)){
+      goversound.play();
+      gameState=END;
+    }
+  }
+    else if(gameState===END){
+      restart.visible=true
+      monsterGroup.destroyEach();
+
+      fruitGroup.destroyEach();
+      knife.visible=false;
+    
+      background(goimg);
+  
+      if(mousePressedOver(restart)){
+        gameState=PLAY;
+        //boy.visible=true;
+        score=0;
+        
+    
+    }
+  }
+  drawSprites();
+  textSize(35);
+  fill("white");
+  text("Score : "+ score,displayWidth-300,50);
+  
+}
+function monsters(){
+  if(frameCount %200 ===0){
+monster= createSprite(200,200);
+monster.addAnimation("mon",monsterImage)
+monster.scale=1.6;
+monster.y= Math.round(random(60, displayHeight-60))
+
+position = Math.round(random(1,2));
+if(position===1){
+  monster.x=0;
+  monster.velocityX=(10+score/100);
+}
+else if(position==2){
+  monster.x = displayWidth;
+  monster.velocityX=-(14+score/100); 
+}
+monsterGroup.add(monster);
+}
+}
+
+function fruits(){
+  if(frameCount%50 === 0){
+fruit= createSprite(100,100);
+fruit.scale=0.3;
+fruit.y= Math.round(random(50, displayHeight-150))
+
+position= Math.round(random(1,2));
+if(position===1){
+  fruit.x=0;
+  fruit.velocityX=(13+score/100);
+}
+else{
+  fruit.x=displayWidth;
+  fruit.velocityX=-(13+score/100);
+}
+
+fru = Math.round(random(1,4));
+switch(fru){
+case 1 : fruit.addImage(fruit1);
+break;
+
+case 2 : fruit.addImage(fruit2);
+break;
+
+case 3 : fruit.addImage(fruit3);
+break;
+
+case 4 : fruit.addImage(fruit4);
+break;
+default: break;
+}
+fruitGroup.add(fruit);
+  }
+
+}
+/*
 function draw() {
-  background("lightblue");
+  background(bgimg);
   
   if(gameState===PLAY){
     
@@ -80,8 +186,9 @@ function draw() {
   
   drawSprites();
   //Display score
-  textSize(25);
-  text("Score : "+ score,250,50);
+  textSize(35);
+  fill("white");
+  text("Score : "+ score,displayWidth-200,50);
 }
 
 
@@ -141,4 +248,4 @@ function fruits(){
     
     fruitGroup.add(fruit);
   }
-}
+} */
